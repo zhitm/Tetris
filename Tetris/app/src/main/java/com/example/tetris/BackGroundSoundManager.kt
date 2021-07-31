@@ -4,30 +4,39 @@ import android.app.Service
 import android.content.Intent
 import android.content.res.AssetFileDescriptor
 import android.media.MediaPlayer
+import android.os.Binder
 import android.os.IBinder
+import android.util.Log
 
 class BackGroundSoundManager : Service() {
     internal lateinit var player : MediaPlayer
-    override fun onBind(arg : Intent): IBinder? {
-        return null
+    private val binder = MyBinder()
+
+    inner class MyBinder : Binder() {
+        fun getService() = this@BackGroundSoundManager
+    }
+    override fun onBind(arg : Intent): IBinder {
+        return binder
     }
 
     override fun onCreate(){
         super.onCreate()
-        var player = MediaPlayer.create(applicationContext, R.raw.song)
+        Log.e("myservice", "CREATED SERVICE")
+        player = MediaPlayer.create(applicationContext, R.raw.song)
         player.isLooping = true
         player.setVolume(100f,100f)
         player.start()
-
-    }
-
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        player.start()
-        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
+//        player.stop()
+//        player.release()
+    }
+    fun setOnPause(){
         player.stop()
-        player.release()
+        Log.e("myservice", "music is on pause")
+    }
+    fun continueMusic(){
+//        player.start()
     }
 }
