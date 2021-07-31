@@ -33,10 +33,12 @@ class BackGroundSoundManager : Service() {
 //        player.release()
     }
     fun setOnPause(){
-        player.stop()
+        player.pause()
         Log.e("myservice", "music is on pause")
     }
     fun continueMusic(){
-//        player.start()
+        player.start()
+        Log.e("myservice", "music continued")
+
     }
 }

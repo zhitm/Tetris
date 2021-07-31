@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mService: BackGroundSoundManager
 //    private val serviceIntent: Intent = Intent(this, BackGroundSoundManager::class.java)
     var isServiceBound = false
-
+    var isMusicOnPause = false
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val binder = service as BackGroundSoundManager.MyBinder
@@ -48,9 +48,13 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         mService.setOnPause()
+        isMusicOnPause = true
     }
     override fun onResume() {
         super.onResume()
-//        mService.continueMusic()
+        if (isMusicOnPause) {
+            mService.continueMusic()
+            isMusicOnPause = false
+        }
     }
 }
