@@ -1,26 +1,24 @@
 package com.example.tetris
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.ActivityInfo
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import java.lang.Thread.sleep
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var mService: BackGroundSoundManager
-//    private val serviceIntent: Intent = Intent(this, BackGroundSoundManager::class.java)
+    private lateinit var mService: BackGroundSoundService
     var isServiceBound = false
-    var isMusicOnPause = false
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val binder = service as BackGroundSoundManager.MyBinder
+            val binder = service as BackGroundSoundService.MyBinder
             mService = binder.getService()
             isServiceBound = true
         }
@@ -30,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startGame(view: View){
+//        unbindService(connection)
         startActivity(Intent(this, GameActivity::class.java))
     }
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,19 +41,31 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        bindService(Intent(this, BackGroundSoundManager::class.java), connection, BIND_AUTO_CREATE)
+        bindService(Intent(this, BackGroundSoundService::class.java), connection, BIND_AUTO_CREATE)
 
     }
     override fun onPause() {
         super.onPause()
+        if (isServiceBound){
         mService.setOnPause()
-        isMusicOnPause = true
+        mService.isMusicOnPause = true
+        }
     }
     override fun onResume() {
         super.onResume()
-        if (isMusicOnPause) {
+        if (isServiceBound)
+        if (mService.isMusicOnPause) {
             mService.continueMusic()
-            isMusicOnPause = false
+            mService.isMusicOnPause = false
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (isServiceBound)
+        if (mService.isMusicOnPause) {
+            mService.continueMusic()
+            mService.isMusicOnPause = false
         }
     }
 }

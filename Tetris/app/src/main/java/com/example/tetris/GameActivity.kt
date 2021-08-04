@@ -1,7 +1,12 @@
 package com.example.tetris
 
+import android.content.ComponentName
+import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.os.IBinder
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
@@ -27,6 +32,19 @@ class GameActivity : AppCompatActivity() {
     private var onUpY = 0f
     private var touchTime = 0L
     private lateinit var recordSaver: RecordsSaver
+
+    private lateinit var mService: BackGroundSoundService
+    var isServiceBound = false
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            val binder = service as BackGroundSoundService.MyBinder
+            mService = binder.getService()
+            isServiceBound = true
+        }
+        override fun onServiceDisconnected(className: ComponentName) {
+            isServiceBound = false
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,6 +85,33 @@ class GameActivity : AppCompatActivity() {
 
     }
 
+    override fun onStart() {
+        super.onStart()
+        bindService(Intent(this, BackGroundSoundService::class.java), connection, BIND_AUTO_CREATE)
+        Log.e("myservice", "gameactstart")
+        afterStart()
+
+    }
+    fun afterStart(){
+        Log.e("myservice", "${isServiceBound} - is bound")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (isServiceBound) {
+            mService.setOnPause()
+            mService.isMusicOnPause = true
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (isServiceBound)
+        if (mService.isMusicOnPause) {
+            mService.continueMusic()
+            mService.isMusicOnPause = false
+        }
+    }
     private fun startGameCircle(){
         game.startGame()
         tetrisView.invalidate()
@@ -74,6 +119,7 @@ class GameActivity : AppCompatActivity() {
 
     }
     private fun onDownBTouch(view: View, event: MotionEvent) : Boolean{
+
         val action = event.action
         val now = System.currentTimeMillis()
         when (action){
@@ -143,4 +189,5 @@ class GameActivity : AppCompatActivity() {
         private const val MIN_TIME_AFTER_FIGURE_CREATED_TO_MOVE = 300
         private const val TIME_BEFORE_FAST_MOVE = 300
     }
+
 }
