@@ -24,7 +24,7 @@ class BackGroundSoundService : Service() {
     override fun onCreate(){
         super.onCreate()
         Log.e("myservice", "CREATED SERVICE")
-        player = MediaPlayer.create(applicationContext, R.raw.song)
+        player = MediaPlayer.create(applicationContext, R.raw.song1)
         player.isLooping = true
         player.setVolume(100f,100f)
         player.start()

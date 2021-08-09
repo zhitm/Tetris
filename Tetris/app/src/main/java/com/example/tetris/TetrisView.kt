@@ -168,8 +168,8 @@ class TetrisView : View {
     companion object{
         private var DELAY_DOWN = 1200
         private const val DELAY = 20
-        private const val BLOCK_SIZE = 75
+        private const val BLOCK_SIZE = 72
         const val OFFSET_X = 50f
-        private const val OFFSET_Y = 50f
+        private const val OFFSET_Y = 5f
     }
 }
